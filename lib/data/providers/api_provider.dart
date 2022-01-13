@@ -42,6 +42,7 @@ class ApiProvider {
       if (apiToken != null) {
         dio.options.headers['Authorization'] = 'Bearer $apiToken';
       }
+      dio.options.baseUrl = 'http://94.74.86.174:8080/api';
       return await dio.post(
         dio.options.baseUrl + url,
         cancelToken: cancelToken,
