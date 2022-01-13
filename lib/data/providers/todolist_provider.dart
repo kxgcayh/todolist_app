@@ -1,7 +1,21 @@
 import 'package:checklist_app/data/models/todo_list_model.dart';
 import 'package:checklist_app/data/providers/api_provider.dart';
+import 'package:checklist_app/data/repositories/authentication_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+final streamTodoList = StreamProvider((ref) {
+  final api = ref.read(todoListProvider);
+  return api.fetchAll();
+});
+
+final todoListProvider = Provider.autoDispose((ref) {
+  final user = ref.read(authenticationRepository).user;
+  final cancelToken = CancelToken();
+  ref.onDispose(() => cancelToken.cancel());
+  ref.maintainState = true;
+  return TodoList(ref, apiToken: user.token!, cancelToken: cancelToken);
+});
 
 class TodoList extends ApiProvider {
   TodoList(
@@ -12,15 +26,6 @@ class TodoList extends ApiProvider {
 
   final CancelToken? cancelToken;
   final String apiToken;
-
-  Future<dynamic> fetch() async {
-    response = await postConnect(
-      '',
-      data: {},
-      cancel: cancelToken,
-    );
-    return response;
-  }
 
   Stream<List<TodoData>?> fetchAll() async* {
     TodoListModel todoListModel;
